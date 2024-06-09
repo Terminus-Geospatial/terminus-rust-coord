@@ -1,6 +1,6 @@
-use tmns::coord::coord_sys_base::CoordSysBase;
-use tmns::coord::coord_sys_def::CoordSysDefinition;
-use tmns::coord::coord_sys_factory::CoordSysFactory;
+use tmns_coord::coord::coord_sys_base::CoordSysBase;
+use tmns_coord::coord::coord_sys_def::CoordSysDefinition;
+use tmns_coord::coord::coord_sys_factory::CoordSysFactory;
 
 pub fn load_coordinate_system(epsg_code : i32 ) -> Box<dyn CoordSysBase>
 {

@@ -7,8 +7,8 @@
 mod config;
 mod utilities;
 
-use tmns::coord::coord_sys_base::CoordSysBase;
-use tmns::coord::transformer::Transformer;
+use tmns_coord::coord::coord_sys_base::CoordSysBase;
+use tmns_coord::coord::transformer::Transformer;
 
 fn main() {
 

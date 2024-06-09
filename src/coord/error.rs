@@ -8,6 +8,7 @@ pub enum ErrorCode {
     LongitudeOutOfRange,
     TransverseMercatorEastingOutOfRange,
     TransverseMercatorNorthingOutOfRange,
+    UtmZoneOverrideFailure,
 }
 
 impl fmt::Display for ErrorCode {
@@ -18,6 +19,7 @@ impl fmt::Display for ErrorCode {
             ErrorCode::LongitudeOutOfRange                  => write!(f, "LongitudeOutOfRange"),
             ErrorCode::TransverseMercatorEastingOutOfRange  => write!(f, "TransverseMercatorEastingOutOfRange"),
             ErrorCode::TransverseMercatorNorthingOutOfRange => write!(f, "TransverseMercatorNorthingOutOfRange"),
+            ErrorCode::UtmZoneOverrideFailure               => write!(f, "UtmZoneOverrideFailure" ),
         }
     }
 }

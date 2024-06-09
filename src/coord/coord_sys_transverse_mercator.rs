@@ -15,6 +15,7 @@ pub struct TransverseMercatorParams {
     pub origin_latitude:  f64,
     pub scale_factor:     f64,
     pub epsilon:          f64,
+    pub hemisphere:       bool,
 }
 
 pub struct CoordSysTransverseMercator {}
@@ -24,7 +25,7 @@ const MAX_DELTA_LONG : f64 = (std::f64::consts::PI * 70.0)/180.0;
 
 impl CoordSysTransverseMercator {
 
-    pub fn geodeticLat( sinChi : f64,
+    pub fn geodetic_lat( sinChi : f64,
                         e : f64 ) -> f64 {
 
         let mut p     : f64;
@@ -34,7 +35,7 @@ impl CoordSysTransverseMercator {
         let onePlusSinChi  : f64 = 1.0 + sinChi;
         let oneMinusSinChi : f64 = 1.0 - sinChi;
 
-        for n in 0..30 {
+        for _n in 0..30 {
             p = ( e * libm::atanh( e * s ) ).exp();
             pSq = p * p;
             s = ( onePlusSinChi * pSq - oneMinusSinChi )
@@ -263,10 +264,10 @@ impl CoordSysTransverseMercator {
         let mut c2ky : [ f64; MAX_TERMS] = [ 0.0; MAX_TERMS ];
         let mut s2ky : [ f64; MAX_TERMS] = [ 0.0; MAX_TERMS ];
 
-        let mut U : f64 = 0.0;
-        let mut V : f64 = 0.0;
-        let mut lambda : f64 = 0.0;
-        let mut sinChi : f64 = 0.0;
+        let mut U : f64;
+        let mut V : f64;
+        let lambda : f64;
+        let sinChi : f64;
 
         let TranMerc_K0R4    :f64  = coeffs.R4oa * params.scale_factor * ellipsoid.a;
         let TranMerc_K0R4inv : f64 = 1.0 / TranMerc_K0R4;
@@ -300,21 +301,21 @@ impl CoordSysTransverseMercator {
 
         //  First plane to sphere
         //  ----- ----- -- ------
-        let coshU : f64 = libm::cosh(U);
-        let sinhU : f64 = libm::sinh(U);
-        let cosV  : f64 = V.cos();
-        let sinV  : f64 = V.sin();
+        let cosh_u : f64 = libm::cosh(U);
+        let sinh_u : f64 = libm::sinh(U);
+        let cos_v  : f64 = V.cos();
+        let sin_v  : f64 = V.sin();
 
         //   Longitude from central meridian
-        if ( cosV.abs() < 10E-12 ) && ( coshU.abs() < 10E-12) {
+        if ( cos_v.abs() < 10E-12 ) && ( cosh_u.abs() < 10E-12) {
             lambda = 0.0;
         } else {
-            lambda = libm::atan2( sinhU, cosV );
+            lambda = libm::atan2( sinh_u, cos_v );
         }
 
         //   Conformal latitude
-        sinChi = sinV / coshU;
-        *latitude = Self::geodeticLat( sinChi, params.epsilon );
+        sinChi = sin_v / cosh_u;
+        *latitude = Self::geodetic_lat( sinChi, params.epsilon );
 
         // Longitude from Greenwich
         // --------  ---- ---------
@@ -355,7 +356,6 @@ impl CoordSysTransverseMercator {
 
         // Eccentricity
         let flattening : f64 = 1.0 / ellipsoid.inv_f;
-        let eps = ( 2.0 * flattening - flattening * flattening ).sqrt();
 
         // Create base coefficients
         let coeffs = TransMercCoeffs::generate_coefficents( ellipsoid );
@@ -402,12 +402,76 @@ impl CoordSysTransverseMercator {
             }
         }
 
-        let invFlattening : f64 = 1.0 / flattening;
-        if invFlattening < 290.0 || invFlattening > 301.0 {
+        let inv_flattening : f64 = 1.0 / flattening;
+        if inv_flattening < 290.0 || inv_flattening > 301.0 {
             log::warn!( "Eccentricity is outside range that algorithm accuracy has been tested." );
         }
 
         return Ok(vec![ longitude, latitude, altitude ]);
+    }
+
+
+    pub fn geo2proj( input_coord:    Vec<f64>,
+                     ellipsoid:      Ellipsoid,
+                     params:         TransverseMercatorParams ) -> Result<Vec<f64>,error::ErrorCode> {
+        log::debug!( "Start of CoordSysTransverseMercator::geo2proj" );
+
+        let mut longitude_rad : f64 = input_coord[0];
+        let latitude_rad  : f64 = input_coord[1];
+
+        if longitude_rad > std::f64::consts::PI {
+            longitude_rad -= 2.0 * std::f64::consts::PI;
+        } else if longitude_rad < -std::f64::consts::PI {
+            longitude_rad += 2.0 * std::f64::consts::PI;
+        }
+
+        //  Convert longitude (Greenwhich) to longitude from the central meridian
+        //  (-Pi, Pi] equivalent needed for checkLatLon.
+        //  Compute its cosine and sine.
+        let mut lambda : f64 = longitude_rad - params.origin_longitude;
+
+        if lambda > std::f64::consts::PI {
+            lambda -= 2.0 * std::f64::consts::PI;
+        }
+        if lambda < -std::f64::consts::PI{
+            lambda += 2.0 * std::f64::consts::PI;
+        }
+
+        Self::checkLatLon( latitude_rad, lambda );
+
+        // Create base coefficients
+        let coeffs = TransMercCoeffs::generate_coefficents( ellipsoid );
+
+        // Convert Geographic to UTM
+        let mut easting : f64 = 0.0;
+        let mut northing : f64 = 0.0;
+
+        let res_temp = Self::latLonToNorthingEasting( latitude_rad,
+                                                      longitude_rad,
+                                                      params,
+                                                      ellipsoid.clone(),
+                                                      coeffs.clone(),
+                                                      &mut northing,
+                                                      &mut easting );
+
+        // The origin may move form (0,0) and this is represented by
+        // a change in the false Northing/Easting values.
+        let mut false_easting_adj  : f64 = 0.0;
+        let mut false_northing_adj : f64 = 0.0;
+
+        Self::latLonToNorthingEasting( params.origin_latitude,
+                                       params.origin_longitude,
+                                       params.clone(),
+                                       ellipsoid.clone(),
+                                       coeffs.clone(),
+                                       &mut false_northing_adj,
+                                       &mut false_easting_adj );
+
+
+        easting  += params.false_easting  - false_easting_adj;
+        northing += params.false_northing - false_northing_adj;
+
+        return Ok(vec![easting, northing, input_coord[2]]);
     }
 }
 

@@ -12,7 +12,7 @@ impl CoordSysBase for CoordSysGeographic {
 
     fn to_log_string(&self) -> String {
 
-        let mut desc : String = String::from( "CoordSysGeographic:\n" );
+        let desc : String = String::from( "CoordSysGeographic:\n" );
 
         return desc;
     }
