@@ -6,18 +6,18 @@ const MAX_TERMS : usize = 8;
 #[derive(Copy, Clone)]
 pub struct TransMercCoeffs {
     pub n1       : f64,
-    pub aCoeff   : [f64; 8],
-    pub bCoeff   : [f64; 8],
-    pub R4oa     : f64,
+    pub a_coeff   : [f64; 8],
+    pub b_coeff   : [f64; 8],
+    pub r4oa     : f64,
 }
 
 impl TransMercCoeffs {
     pub fn new() -> TransMercCoeffs {
         TransMercCoeffs {
             n1: 0.0,
-            aCoeff: [0.0; MAX_TERMS],
-            bCoeff: [0.0; MAX_TERMS],
-            R4oa: 0.0,
+            a_coeff: [0.0; MAX_TERMS],
+            b_coeff: [0.0; MAX_TERMS],
+            r4oa: 0.0,
         }
     }
 
@@ -26,7 +26,7 @@ impl TransMercCoeffs {
         let mut res: [f64; MAX_TERMS] = [0.0; MAX_TERMS];
 
         // Misc coeffients used in computations
-        let mut coeff: f64 = 0.0;
+        let mut coeff: f64;
         let n1: f64 = 1.0 / (2.0 * ellipsoid.inv_f - 1.0);
         let n2: f64 = n1 * n1;
         let n3: f64 = n2 * n1;
@@ -35,8 +35,7 @@ impl TransMercCoeffs {
         let n6: f64 = n5 * n1;
         let n7: f64 = n6 * n1;
         let n8: f64 = n7 * n1;
-        let n9: f64 = n8 * n1;
-        let n10: f64 = n9 * n1;
+        //let n9: f64 = n8 * n1;
 
         match ellipsoid.code {
 
@@ -134,7 +133,7 @@ impl TransMercCoeffs {
         let mut res: [f64; MAX_TERMS] = [0.0; MAX_TERMS];
 
         // Misc coeffients used in computations
-        let mut coeff: f64 = 0.0;
+        let mut _coeff: f64 = 0.0;
         let n1: f64 = 1.0 / (2.0 * ellipsoid.inv_f - 1.0);
         let n2: f64 = n1 * n1;
         let n3: f64 = n2 * n1;
@@ -144,7 +143,7 @@ impl TransMercCoeffs {
         let n7: f64 = n6 * n1;
         let n8: f64 = n7 * n1;
         let n9: f64 = n8 * n1;
-        let n10: f64 = n9 * n1;
+        //let n10: f64 = n9 * n1;
 
         match ellipsoid.code {
             EllipsoidType::WGS84 => {
@@ -161,72 +160,72 @@ impl TransMercCoeffs {
 
             EllipsoidType::CUSTOM => {
                 //   Computation of coefficient b2
-                coeff = 0.0;
-                coeff += (-7944359.0) * n8 / 67737600.0;
-                coeff += (5406467.0) * n7 / 38707200.0;
-                coeff += (-96199.0) * n6 / 604800.0;
-                coeff += (81.0) * n5 / 512.0;
-                coeff += (1.0) * n4 / 360.0;
-                coeff += (-37.0) * n3 / 96.0;
-                coeff += (2.0) * n2 / 3.0;
-                coeff += (-1.0) * n1 / 2.0;
-                res[0] = coeff;
+                _coeff = 0.0;
+                _coeff += (-7944359.0) * n8 / 67737600.0;
+                _coeff += (5406467.0) * n7 / 38707200.0;
+                _coeff += (-96199.0) * n6 / 604800.0;
+                _coeff += (81.0) * n5 / 512.0;
+                _coeff += (1.0) * n4 / 360.0;
+                _coeff += (-37.0) * n3 / 96.0;
+                _coeff += (2.0) * n2 / 3.0;
+                _coeff += (-1.0) * n1 / 2.0;
+                res[0] = _coeff;
 
                 //   Computation of coefficient b4
-                coeff = 0.0;
-                coeff += (-24749483.0) * n8 / 348364800.0;
-                coeff += (-51841.0) * n7 / 1209600.0;
-                coeff += (1118711.0) * n6 / 3870720.0;
-                coeff += (-46.0) * n5 / 105.0;
-                coeff += (437.0) * n4 / 1440.0;
-                coeff += (-1.0) * n3 / 15.0;
-                coeff += (-1.0) * n2 / 48.0;
-                res[1] = coeff;
+                _coeff = 0.0;
+                _coeff += (-24749483.0) * n8 / 348364800.0;
+                _coeff += (-51841.0) * n7 / 1209600.0;
+                _coeff += (1118711.0) * n6 / 3870720.0;
+                _coeff += (-46.0) * n5 / 105.0;
+                _coeff += (437.0) * n4 / 1440.0;
+                _coeff += (-1.0) * n3 / 15.0;
+                _coeff += (-1.0) * n2 / 48.0;
+                res[1] = _coeff;
 
                 //   Computation of coefficient b6
-                coeff = 0.0;
-                coeff += (6457463.0) * n8 / 17740800.0;
-                coeff += (-9261899.0) * n7 / 58060800.0;
-                coeff += (-5569.0) * n6 / 90720.0;
-                coeff += (209.0) * n5 / 4480.0;
-                coeff += (37.0) * n4 / 840.0;
-                coeff += (-17.0) * n3 / 480.0;
-                res[2] = coeff;
+                _coeff = 0.0;
+                _coeff += (6457463.0) * n8 / 17740800.0;
+                _coeff += (-9261899.0) * n7 / 58060800.0;
+                _coeff += (-5569.0) * n6 / 90720.0;
+                _coeff += (209.0) * n5 / 4480.0;
+                _coeff += (37.0) * n4 / 840.0;
+                _coeff += (-17.0) * n3 / 480.0;
+                res[2] = _coeff;
 
                 //   Computation of coefficient b8
-                coeff = 0.0;
-                coeff += (-324154477.0) * n8 / 7664025600.0;
-                coeff += (-466511.0) * n7 / 2494800.0;
-                coeff += (830251.0) * n6 / 7257600.0;
-                coeff += (11.0) * n5 / 504.0;
-                coeff += (-4397.0) * n4 / 161280.0;
-                res[3] = coeff;
+                _coeff = 0.0;
+                _coeff += (-324154477.0) * n8 / 7664025600.0;
+                _coeff += (-466511.0) * n7 / 2494800.0;
+                _coeff += (830251.0) * n6 / 7257600.0;
+                _coeff += (11.0) * n5 / 504.0;
+                _coeff += (-4397.0) * n4 / 161280.0;
+                res[3] = _coeff;
 
                 //   Computation of coefficient b10
-                coeff = 0.0;
-                coeff += (-22894433.0) * n8 / 124540416.0;
-                coeff += (8005831.0) * n7 / 63866880.0;
-                coeff += (108847.0) * n6 / 3991680.0;
-                coeff += (-4583.0) * n5 / 161280.0;
-                res[4] = coeff;
+                _coeff = 0.0;
+                _coeff += (-22894433.0) * n8 / 124540416.0;
+                _coeff += (8005831.0) * n7 / 63866880.0;
+                _coeff += (108847.0) * n6 / 3991680.0;
+                _coeff += (-4583.0) * n5 / 161280.0;
+                res[4] = _coeff;
 
                 //   Computation of coefficient b12
-                coeff = 0.0;
-                coeff += (2204645983.0) * n8 / 12915302400.0;
-                coeff += (16363163.0) * n7 / 518918400.0;
-                coeff += (-20648693.0) * n6 / 638668800.0;
-                res[5] = coeff;
+                _coeff = 0.0;
+                _coeff += (2204645983.0) * n8 / 12915302400.0;
+                _coeff += (16363163.0) * n7 / 518918400.0;
+                _coeff += (-20648693.0) * n6 / 638668800.0;
+                res[5] = _coeff;
 
                 //   Computation of coefficient b14
-                coeff = 0.0;
-                coeff += (497323811.0) * n8 / 12454041600.0;
-                coeff += (-219941297.0) * n7 / 5535129600.0;
-                res[6] = coeff;
+                _coeff = 0.0;
+                _coeff += (497323811.0) * n8 / 12454041600.0;
+                _coeff += (-219941297.0) * n7 / 5535129600.0;
+                res[6] = _coeff;
 
                 //   Computation of coefficient b16
-                coeff = 0.0;
-                coeff += (-191773887257.0) * n8 / 3719607091200.0;
-                res[7] = coeff;
+                _coeff = 0.0;
+                _coeff += (-191773887257.0) * n8 / 3719607091200.0;
+                res[7] = _coeff;
                 return res;
             },
         }
@@ -275,8 +274,8 @@ impl TransMercCoeffs {
         let mut res = TransMercCoeffs::new();
 
         // Set the Coefficients
-        res.aCoeff = TransMercCoeffs::get_a_coeffs( ellipsoid );
-        res.bCoeff = TransMercCoeffs::get_b_coeffs( ellipsoid );
+        res.a_coeff = TransMercCoeffs::get_a_coeffs( ellipsoid );
+        res.b_coeff = TransMercCoeffs::get_b_coeffs( ellipsoid );
 
         //  Create base coefficients
         let mut coeff: f64 = 0.0;
@@ -297,7 +296,7 @@ impl TransMercCoeffs {
         coeff +=      n4 / 64.0;
         coeff +=      n2 / 4.0;
         coeff += 1.0;
-        res.R4oa = coeff / (1.0 + n1);
+        res.r4oa = coeff / (1.0 + n1);
 
         return res;
     }

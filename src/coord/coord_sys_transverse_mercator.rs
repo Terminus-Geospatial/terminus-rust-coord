@@ -25,15 +25,15 @@ const MAX_DELTA_LONG : f64 = (std::f64::consts::PI * 70.0)/180.0;
 
 impl CoordSysTransverseMercator {
 
-    pub fn geodetic_lat( sinChi : f64,
+    pub fn geodetic_lat( sin_chi : f64,
                         e : f64 ) -> f64 {
 
         let mut p     : f64;
         let mut pSq   : f64;
         let mut s_old : f64 = 1.0e99;
-        let mut s     : f64 = sinChi;
-        let onePlusSinChi  : f64 = 1.0 + sinChi;
-        let oneMinusSinChi : f64 = 1.0 - sinChi;
+        let mut s     : f64 = sin_chi;
+        let onePlusSinChi  : f64 = 1.0 + sin_chi;
+        let oneMinusSinChi : f64 = 1.0 - sin_chi;
 
         for _n in 0..30 {
             p = ( e * libm::atanh( e * s ) ).exp();
@@ -223,8 +223,8 @@ impl CoordSysTransverseMercator {
         let mut yStar : f64 = 0.0;
 
         for k in (0..5).rev() {
-            xStar += coeffs.aCoeff[k] * s2ku[k] * c2kv[k];
-            yStar += coeffs.aCoeff[k] * c2ku[k] * s2kv[k];
+            xStar += coeffs.a_coeff[k] * s2ku[k] * c2kv[k];
+            yStar += coeffs.a_coeff[k] * c2ku[k] * s2kv[k];
         }
 
         xStar += U;
@@ -232,7 +232,7 @@ impl CoordSysTransverseMercator {
 
 
         // Apply isoperimetric radius, scale adjustment, and offsets
-        let TranMerc_K0R4 : f64  = coeffs.R4oa * params.scale_factor * ellipsoid.a;
+        let TranMerc_K0R4 : f64  = coeffs.r4oa * params.scale_factor * ellipsoid.a;
         *easting  = TranMerc_K0R4 * xStar;
         *northing = TranMerc_K0R4 * yStar;
 
@@ -269,7 +269,7 @@ impl CoordSysTransverseMercator {
         let lambda : f64;
         let sinChi : f64;
 
-        let TranMerc_K0R4    :f64  = coeffs.R4oa * params.scale_factor * ellipsoid.a;
+        let TranMerc_K0R4    :f64  = coeffs.r4oa * params.scale_factor * ellipsoid.a;
         let TranMerc_K0R4inv : f64 = 1.0 / TranMerc_K0R4;
 
         //  Undo offsets, scale change, and factor R4
@@ -292,8 +292,8 @@ impl CoordSysTransverseMercator {
         V = 0.0;
 
         for k in (0..5).rev() {
-            U += coeffs.bCoeff[k] * s2kx[k] * c2ky[k];
-            V += coeffs.bCoeff[k] * c2kx[k] * s2ky[k];
+            U += coeffs.b_coeff[k] * s2kx[k] * c2ky[k];
+            V += coeffs.b_coeff[k] * c2kx[k] * s2ky[k];
         }
 
         U += xStar;
@@ -360,13 +360,16 @@ impl CoordSysTransverseMercator {
         // Create base coefficients
         let coeffs = TransMercCoeffs::generate_coefficents( ellipsoid );
 
-        let res1 = Self::latLonToNorthingEasting( params.origin_latitude,
-                                                  params.origin_longitude,
-                                                  params.clone(),
-                                                  ellipsoid.clone(),
-                                                  coeffs.clone(),
-                                                  &mut false_northing_adj,
-                                                  &mut false_easting_adj );
+        match Self::latLonToNorthingEasting( params.origin_latitude,
+                                             params.origin_longitude,
+                                             params.clone(),
+                                             ellipsoid.clone(),
+                                             coeffs.clone(),
+                                             &mut false_northing_adj,
+                                             &mut false_easting_adj ) {
+            Err(E) => return Err(E),
+            Ok(_) => (),
+        }
 
         easting  -= params.false_easting  - false_easting_adj;
         northing -= params.false_northing - false_northing_adj;
@@ -446,26 +449,33 @@ impl CoordSysTransverseMercator {
         let mut easting : f64 = 0.0;
         let mut northing : f64 = 0.0;
 
-        let res_temp = Self::latLonToNorthingEasting( latitude_rad,
-                                                      longitude_rad,
-                                                      params,
-                                                      ellipsoid.clone(),
-                                                      coeffs.clone(),
-                                                      &mut northing,
-                                                      &mut easting );
+        match Self::latLonToNorthingEasting( latitude_rad,
+                                             longitude_rad,
+                                             params,
+                                             ellipsoid.clone(),
+                                             coeffs.clone(),
+                                             &mut northing,
+                                             &mut easting ) {
+            Err(E) => return Err(E),
+            Ok(_) => (),
+        }
 
         // The origin may move form (0,0) and this is represented by
         // a change in the false Northing/Easting values.
         let mut false_easting_adj  : f64 = 0.0;
         let mut false_northing_adj : f64 = 0.0;
 
-        Self::latLonToNorthingEasting( params.origin_latitude,
+        match Self::latLonToNorthingEasting( params.origin_latitude,
                                        params.origin_longitude,
                                        params.clone(),
                                        ellipsoid.clone(),
                                        coeffs.clone(),
                                        &mut false_northing_adj,
-                                       &mut false_easting_adj );
+                                       &mut false_easting_adj ) {
+
+            Err(E) => return Err(E),
+            Ok(_) => (),
+        }
 
 
         easting  += params.false_easting  - false_easting_adj;

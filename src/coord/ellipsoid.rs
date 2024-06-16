@@ -65,8 +65,6 @@ mod tests {
 
     use super::*;
 
-    use std::num;
-
     #[test]
     fn test_create_wgs84() {
         let wgs84 = Ellipsoid::wgs84();
