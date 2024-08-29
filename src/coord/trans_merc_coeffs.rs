@@ -142,7 +142,7 @@ impl TransMercCoeffs {
         let n6: f64 = n5 * n1;
         let n7: f64 = n6 * n1;
         let n8: f64 = n7 * n1;
-        let n9: f64 = n8 * n1;
+        //let n9: f64 = n8 * n1;
         //let n10: f64 = n9 * n1;
 
         match ellipsoid.code {

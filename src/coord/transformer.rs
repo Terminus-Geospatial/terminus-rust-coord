@@ -25,8 +25,8 @@ impl Transformer {
             true => {
                 // Handle all errors if the call actually fails
                 match self.cs_in.to_geographic( input_coord ) {
-                    Ok(T) => T,
-                    Err(E) => return Err(E),
+                    Ok(t) => t,
+                    Err(e) => return Err(e),
                 }
             },
             false => return Ok(input_coord),
@@ -39,8 +39,8 @@ impl Transformer {
         let proj_res = match self.cs_out.is_projected() {
             true => {
                 match self.cs_out.from_geographic( geo_final ) {
-                    Ok(T) => T,
-                    Err( E ) => return Err(E),
+                    Ok(t) => t,
+                    Err( e ) => return Err(e),
                 }
             },
             false => geo_final,
