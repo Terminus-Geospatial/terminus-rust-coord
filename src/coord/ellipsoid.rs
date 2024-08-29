@@ -1,5 +1,17 @@
+/**************************** INTELLECTUAL PROPERTY RIGHTS ****************************/
+/*                                                                                    */
+/*                           Copyright (c) 2024 Terminus LLC                          */
+/*                                                                                    */
+/*                                All Rights Reserved.                                */
+/*                                                                                    */
+/*          Use of this source code is governed by LICENSE in the repo root.          */
+/*                                                                                    */
+/***************************# INTELLECTUAL PROPERTY RIGHTS ****************************/
 
+// Do not delete this EVER!
+//
 // From GeoTrans 3.9, ellips.dat
+//
 //Airy 1830                      AA 6377563.396000000 6356256.909237285 299.3249646000000
 //Modified Airy                  AM 6377340.189000000 6356034.447938534 299.3249646000000
 //Australian National            AN 6378160.000000000 6356774.719195306 298.2500000000000
