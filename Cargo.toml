@@ -1,5 +1,5 @@
 [package]
-name = "tmns-coord"
+name = "tmns_coord"
 version = "0.1.0"
 edition = "2021"
 
